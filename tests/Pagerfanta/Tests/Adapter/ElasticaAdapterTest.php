@@ -65,4 +65,15 @@ class ElasticaAdapterTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(100, $this->adapter->getNbResults());
     }
+
+    public function testGetNbResultsWithMaxResultsSet()
+    {
+        $adapter = new ElasticaAdapter($this->searchable, $this->query, 10);
+
+        $this->resultSet->expects($this->once())
+            ->method('getTotalHits')
+            ->will($this->returnValue(100));
+
+        $this->assertSame(10, $adapter->getNbResults());
+    }
 }

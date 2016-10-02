@@ -31,10 +31,16 @@ class ElasticaAdapter implements AdapterInterface
      */
     private $searchable;
 
-    public function __construct(SearchableInterface $searchable, Query $query)
+    /**
+     * @var int|null
+     */
+    private $maxResults;
+
+    public function __construct(SearchableInterface $searchable, Query $query, $maxResults = null)
     {
         $this->searchable = $searchable;
         $this->query = $query;
+        $this->maxResults = $maxResults;
     }
 
     /**
@@ -45,10 +51,16 @@ class ElasticaAdapter implements AdapterInterface
     public function getNbResults()
     {
         if (!$this->resultSet) {
-            return $this->searchable->search($this->query)->getTotalHits();
+            $totalHits = $this->searchable->search($this->query)->getTotalHits();
+        } else {
+            $totalHits = $this->resultSet->getTotalHits();
         }
 
-        return $this->resultSet->getTotalHits();
+        if (null === $this->maxResults) {
+            return $totalHits;
+        }
+
+        return min($totalHits, $this->maxResults);
     }
 
     /**
